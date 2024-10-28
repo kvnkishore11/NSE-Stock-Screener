@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Stock {
+  id              Int              @id @default(autoincrement())
+  symbol          String           @unique
+  name            String
+  sector          String?
+  industry        String?
+  marketCapHistory MarketCapHistory[]
+  dailyData       DailyStockData[]
+}
+
+model MarketCapHistory {
+  id        Int      @id @default(autoincrement())
+  stockId   Int
+  date      DateTime
+  marketCap BigInt
+  stock     Stock    @relation(fields: [stockId], references: [id])
+
+  @@unique([stockId, date])
+  @@index([date, marketCap])
+}
+
+model DailyStockData {
+  id        Int      @id @default(autoincrement())
+  stockId   Int
+  date      DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Int
+  stock     Stock    @relation(fields: [stockId], references: [id])
+
+  @@unique([stockId, date])
+  @@index([date, high])
+}
